@@ -142,7 +142,7 @@ class BigramLM:
         if(self.uni_gram_lm.in_vocab(prior) and self.in_bigram_vocab(bigram)):
             return math.log(self.freqs[bigram] + 1) - math.log(self.uni_gram_lm.freqs[prior] + len(self.uni_gram_lm.freqs))
         else:
-            return float("-inf")
+            return 0
 
 
     def in_bigram_vocab(self, bigram):
@@ -188,7 +188,7 @@ class InterpolatedLM:
         bi_log_prob = self.biLM.log_probs_unsmoothed(target_word, prior)
         uni_log_prob = self.uniLM.log_prob(target_word)
 
-        return ((1-self.Lambda)* bi_log_prob + (self.Lambda)* uni_log_prob)
+        return ((1-self.Lambda) + bi_log_prob + (self.Lambda)+uni_log_prob)
 
     def check_probs(self):
         # Hint: Writing code to check whether the probabilities you
@@ -309,6 +309,7 @@ if __name__ == '__main__':
     else:
         # interpolation 
         Lambda = 0.1
+
         lm = InterpolatedLM(train_corpus, Lambda)
         for line in open(predict_corpus):
             # Split the line on a tab; get the target word to correct and
