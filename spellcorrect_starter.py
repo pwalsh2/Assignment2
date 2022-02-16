@@ -295,7 +295,7 @@ if __name__ == '__main__':
         # considers deletions)
         candidates = distance_one_edits(target_word)
         iv_candidates = [c for c in candidates if lm.in_vocab(c)]
-        print()
+   
         # Find the candidate correction with the highest probability;
         # if no candidate has non-zero probability, or there are no
         # candidates, give up and output the original target word as
