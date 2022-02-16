@@ -140,7 +140,7 @@ class BigramLM:
         target_word = target_word.lower()
         bigram = prior + " " + target_word
         if(self.uni_gram_lm.in_vocab(prior) and self.in_bigram_vocab(bigram)):
-            return math.log(self.freqs[bigram]) - math.log(self.uni_gram_lm.freqs[prior] )
+            return self.freqs[bigram] / self.uni_gram_lm.freqs[prior]
         else:
             return 0
 
