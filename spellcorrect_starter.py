@@ -188,7 +188,7 @@ class InterpolatedLM:
         bi_log_prob = self.biLM.log_probs_unsmoothed(target_word, prior)
         uni_log_prob = self.uniLM.log_prob(target_word)
 
-        return ((1-self.Lambda) * bi_log_prob + (self.Lambda)*uni_log_prob)
+        return math.log(((1-self.Lambda) * bi_log_prob + (self.Lambda)*uni_log_prob))
 
     def check_probs(self):
         # Hint: Writing code to check whether the probabilities you
