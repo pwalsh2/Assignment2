@@ -309,8 +309,8 @@ if __name__ == '__main__':
           
             ivc_log_prob = ivc_log_probA *  ivc_log_probB
           
-            # if(ivc_log_prob < 0 ):
-            #     ivc_log_prob = ivc_log_prob * -1
+            if(ivc_log_prob < 0 ):
+                ivc_log_prob = ivc_log_prob * -1
             if ivc_log_prob > best_prob:
                 best_prob = ivc_log_prob
                 best_correction = ivc
