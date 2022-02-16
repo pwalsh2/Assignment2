@@ -192,7 +192,7 @@ class SmoothedBigramLM:
     
         bigram = prior + " " + target_word
         if bigram in self.freqs and prior in self.uni_gram_lm.freqs:
-            return math.log(self.freqs[bigram] + 1) - math.log(self.uni_gram_lm.freqs[prior] + len(self.uni_gram_lm.freqs))
+            return math.log(self.freqs[bigram] + 1) - math.log(self.uni_gram_lm.freqs[prior] + len(self.freqs))
         else:
 
             # This is a bit of a hack to get a float with the value of
@@ -308,13 +308,14 @@ if __name__ == '__main__':
             ivc_log_probB = lm.log_prob(next_word, ivc)
           
             ivc_log_prob = ivc_log_probA + ivc_log_probB
-          
+            print(ivc_log_prob)
+            print(ivc)
             if(ivc_log_prob < 0 ):
                 ivc_log_prob = ivc_log_prob * -1
             if ivc_log_prob > best_prob:
                 best_prob = ivc_log_prob
                 best_correction = ivc
-
+        
         print(best_correction)
 
 
