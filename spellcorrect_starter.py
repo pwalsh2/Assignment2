@@ -8,7 +8,8 @@ class UnsmoothedUnigramLM:
         for line in open(fname):
             tokens = line.split()
             for t in tokens:
-                self.freqs[t] = self.freqs.get(t, 0) + 1
+                t_low = t.lower()
+                self.freqs[t_low] = self.freqs.get(t_low, 0) + 1
         # Computing this sum once in the constructor, instead of every
         # time it's needed in log_prob, speeds things up
         self.num_tokens = sum(self.freqs.values())
@@ -51,8 +52,8 @@ class UnigramLM:
         for line in open(fname):
             tokens = line.split()
             for t in tokens:
-               
-                self.freqs[t] = self.freqs.get(t, 0) + 1
+                
+                self.freqs[t.lower()] = self.freqs.get(t.lower(), 0) + 1
         # Computing this sum once in the constructor, instead of every
         # time it's needed in
         # log_prob, speeds things up
@@ -64,6 +65,7 @@ class UnigramLM:
         # (This is not actually a problem for this language model, but
         # it can become an issue when we multiply together many
         # probabilities)
+        word = word.lower()
         if word in self.freqs:
             return math.log(self.freqs[word]+ 1) - math.log(self.num_tokens + len(self.freqs))
         else:
@@ -170,7 +172,7 @@ class SmoothedBigramLM:
         for line in open(fname):
             tokens = line.split()
             for t in range(len(tokens)-1):
-                bi_gram_token = tokens[t] + " " + tokens[t+1]
+                bi_gram_token = tokens[t].lower() + " " + tokens[t+1].lower()
                 self.freqs[bi_gram_token] = self.freqs.get(bi_gram_token, 0) + 1
               
         self.uni_gram_lm = UnigramLM(fname)      
@@ -183,7 +185,8 @@ class SmoothedBigramLM:
         # (This is not actually a problem for this language model, but
         # it can become an issue when we multiply together many
         # probabilities)
-     
+        prior = prior.lower()
+        target_word = target_word.lower()
     
         bigram = prior + " " + target_word
         if bigram in self.freqs and prior in self.uni_gram_lm.freqs:
