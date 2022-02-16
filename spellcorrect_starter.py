@@ -192,7 +192,7 @@ class SmoothedBigramLM:
     
         bigram = prior + " " + target_word
         if bigram in self.freqs and prior in self.uni_gram_lm.freqs:
-            return math.log(self.freqs[bigram] + 1) - math.log(self.uni_gram_lm.freqs[prior] + len(self.freqs))
+            return math.log(self.freqs[bigram] + 1) - math.log(self.uni_gram_lm.freqs[prior] + len(self.uni_gram_lm.freqs))
         else:
 
             # This is a bit of a hack to get a float with the value of
