@@ -131,7 +131,7 @@ class UnsmoothedBrigramLM:
         # (This is not actually a problem for this language model, but
         # it can become an issue when we multiply together many
         # probabilities)
-        bigram = target_word + " " + prior
+        bigram = prior + " " + target_word
 
         if bigram in self.freqs and prior in self.uni_gram_lm.freqs:
             return math.log(self.freqs[bigram]) - math.log(self.uni_gram_lm.freqs[prior] )
@@ -172,27 +172,29 @@ class SmoothedBigramLM:
                 bi_gram_token = tokens[t] + " " + tokens[t+1]
                 self.freqs[bi_gram_token] = self.freqs.get(bi_gram_token, 0) + 1
               
-        self.uni_gram_lm = UnsmoothedUnigramLM(fname)      
+        self.uni_gram_lm = UnigramLM(fname)      
         # Computing this sum once in the constructor, instead of every
         # time it's needed in log_prob, speeds things up
         self.num_tokens = sum(self.freqs.values())
 
-    def log_prob(self, target_word, prior, ):
+    def log_prob(self, target_word, prior, next ):
         # Compute probabilities in log space to avoid underflow errors
         # (This is not actually a problem for this language model, but
         # it can become an issue when we multiply together many
         # probabilities)
-        bigram = target_word + " " + prior
-
-        if bigram in self.freqs and prior in self.uni_gram_lm.freqs:
-            return math.log(self.freqs[bigram] + 1) - math.log(self.uni_gram_lm.freqs[prior] + len(self.freqs) + 1)
+        bigramA = prior + " " + target_word
+        bigramB = target_word + " " + next
+        if bigramA in self.freqs and bigramB in self.freqs and next in self.uni_gram_lm.freqs and prior in self.uni_gram_lm.freqs:
+            prob_prior = (self.freqs[bigramA] + 1) / (self.uni_gram_lm.freqs[prior] + len(self.freqs))
+            prob_next = (self.freqs[bigramB] + 1) /(self.uni_gram_lm.freqs[target_word] + len(self.freqs))
+            return math.log(prob_prior) + math.log(prob_next)
         else:
             # This is a bit of a hack to get a float with the value of
             # minus infinity for words that have probability 0
-            return float("-inf")
+            return 0
 
     def in_vocab(self, word):
-        return word in self.freqs
+        return word in self.uni_gram_lm.freqs
 
     def check_probs(self):
         # Hint: Writing code to check whether the probabilities you
@@ -268,7 +270,7 @@ if __name__ == '__main__':
     predict_corpus = sys.argv[2]
 
     # Train the language model
-    lm = UnigramLM(train_corpus)
+    lm = SmoothedBigramLM(train_corpus)
     # lm_bi = UnsmoothedBrigramLM(train_corpus)
     # You can comment this out to run faster...
     # lm.check_probs()
@@ -280,12 +282,13 @@ if __name__ == '__main__':
         target_index = int(target_index)
         sentence = sentence.split()
         target_word = sentence[target_index]
-
+        previous_word = sentence[target_index - 1]
+        next_word = sentence[target_index + 1]
         # Get the in-vocabulary candidates (this starter code only
         # considers deletions)
         candidates = distance_one_edits(target_word)
         iv_candidates = [c for c in candidates if lm.in_vocab(c)]
-        
+      
         # Find the candidate correction with the highest probability;
         # if no candidate has non-zero probability, or there are no
         # candidates, give up and output the original target word as
@@ -293,7 +296,7 @@ if __name__ == '__main__':
         best_prob = float("-inf")
         best_correction = target_word
         for ivc in iv_candidates:
-            ivc_log_prob = lm.log_prob(ivc)
+            ivc_log_prob = lm.log_prob(ivc, previous_word, next_word)
             if ivc_log_prob > best_prob:
                 best_prob = ivc_log_prob
                 best_correction = ivc
