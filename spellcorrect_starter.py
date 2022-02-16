@@ -56,6 +56,7 @@ class UnigramLM:
         # Computing this sum once in the constructor, instead of every
         # time it's needed in
         # log_prob, speeds things up
+        self.freqs["UNK"] = self.freqs.get("UNK", 0) + 1
         self.num_tokens = sum(self.freqs.values())
 
     def log_prob(self, word):
@@ -182,12 +183,18 @@ class SmoothedBigramLM:
         # (This is not actually a problem for this language model, but
         # it can become an issue when we multiply together many
         # probabilities)
-        bigramA = prior + " " + target_word
-  
-        if bigramA in self.freqs and prior in self.uni_gram_lm.freqs:
-           
-            return math.log(self.freqs[bigramA] + 1) - math.log(self.uni_gram_lm.freqs[prior] + len(self.uni_gram_lm.freqs))
+        if(not(prior in self.uni_gram_lm.freqs)):
+            prior = "UNK"
+        elif(not(target_word in self.uni_gram_lm.freqs)):
+            target_word = "UNK"
         else:
+            bigram = prior + " " + target_word
+    
+        bigram = prior + " " + target_word
+        if bigram in self.freqs and prior in self.uni_gram_lm.freqs:
+            return math.log(self.freqs[bigram] + 1) - math.log(self.uni_gram_lm.freqs[prior] + len(self.uni_gram_lm.freqs))
+        else:
+
             # This is a bit of a hack to get a float with the value of
             # minus 
             # infinity for words that have probability 0
