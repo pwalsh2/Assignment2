@@ -1,6 +1,6 @@
 import math
 import string
-count = 0
+
 eps = 0.0001
 class UnsmoothedUnigramLM:
     def __init__(self, fname):
@@ -56,7 +56,7 @@ class UnigramLM:
         # Computing this sum once in the constructor, instead of every
         # time it's needed in
         # log_prob, speeds things up
-        self.freqs["UNK"] = self.freqs.get("UNK", 0)
+        self.freqs["UNK"] = self.freqs.get("UNK", 0) + 1
         self.num_tokens = sum(self.freqs.values())
 
     def log_prob(self, word):
@@ -193,14 +193,11 @@ class SmoothedBigramLM:
         bigram = prior + " " + target_word
         if bigram in self.freqs and prior in self.uni_gram_lm.freqs:
             return math.log(self.freqs[bigram] + 1) - math.log(self.uni_gram_lm.freqs[prior] + len(self.uni_gram_lm.freqs))
-        
-        elif(prior in self.uni_gram_lm.freqs):
-            return math.log(1) - math.log(self.uni_gram_lm.freqs[prior] + len(self.uni_gram_lm.freqs))
         else:
+
             # This is a bit of a hack to get a float with the value of
             # minus 
             # infinity for words that have probability 0
-            count += 1
             return 0
 
     def in_vocab(self, word):
@@ -298,7 +295,7 @@ if __name__ == '__main__':
         # considers deletions)
         candidates = distance_one_edits(target_word)
         iv_candidates = [c for c in candidates if lm.in_vocab(c)]
-      
+        print()
         # Find the candidate correction with the highest probability;
         # if no candidate has non-zero probability, or there are no
         # candidates, give up and output the original target word as
@@ -311,13 +308,13 @@ if __name__ == '__main__':
             ivc_log_probB = lm.log_prob(next_word, ivc)
           
             ivc_log_prob = ivc_log_probA + ivc_log_probB
-           
+          
             if(ivc_log_prob < 0 ):
-                ivc_log_prob = ivc_log_prob * - 1
+                ivc_log_prob = ivc_log_prob * -1
             if ivc_log_prob > best_prob:
                 best_prob = ivc_log_prob
                 best_correction = ivc
-        
+
         print(best_correction)
 
-   
+
