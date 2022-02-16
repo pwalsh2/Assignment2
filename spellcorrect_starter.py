@@ -177,20 +177,20 @@ class SmoothedBigramLM:
         # time it's needed in log_prob, speeds things up
         self.num_tokens = sum(self.freqs.values())
 
-    def log_prob(self, target_word, prior, next ):
+    def log_prob(self, target_word, prior ):
         # Compute probabilities in log space to avoid underflow errors
         # (This is not actually a problem for this language model, but
         # it can become an issue when we multiply together many
         # probabilities)
         bigramA = prior + " " + target_word
-        bigramB = target_word + " " + next
-        if bigramA in self.freqs and bigramB in self.freqs and next in self.uni_gram_lm.freqs and prior in self.uni_gram_lm.freqs:
-            prob_prior = (self.freqs[bigramA] + 1) / (self.uni_gram_lm.freqs[prior] + len(self.freqs))
-            prob_next = (self.freqs[bigramB] + 1) /(self.uni_gram_lm.freqs[target_word] + len(self.freqs))
-            return math.log(prob_prior) + math.log(prob_next)
+  
+        if bigramA in self.freqs and prior in self.uni_gram_lm.freqs:
+           
+            return math.log(self.freqs[bigramA] + 1) - math.log(self.uni_gram_lm.freqs[prior] + len(self.uni_gram_lm.freqs))
         else:
             # This is a bit of a hack to get a float with the value of
-            # minus infinity for words that have probability 0
+            # minus 
+            # infinity for words that have probability 0
             return 0
 
     def in_vocab(self, word):
@@ -296,7 +296,14 @@ if __name__ == '__main__':
         best_prob = float("-inf")
         best_correction = target_word
         for ivc in iv_candidates:
-            ivc_log_prob = lm.log_prob(ivc, previous_word, next_word)
+            ivc_log_probA = lm.log_prob(ivc, previous_word)
+
+            ivc_log_probB = lm.log_prob(next_word, ivc)
+          
+            ivc_log_prob = ivc_log_probA + ivc_log_probB
+          
+            if(ivc_log_prob < 0 ):
+                ivc_log_prob = ivc_log_prob * -1
             if ivc_log_prob > best_prob:
                 best_prob = ivc_log_prob
                 best_correction = ivc
