@@ -308,8 +308,8 @@ if __name__ == '__main__':
             ivc_log_probB = lm.log_prob(next_word, ivc)
           
             ivc_log_prob = ivc_log_probA + ivc_log_probB
-            print(ivc_log_prob)
-            print(ivc)
+            # print(ivc_log_prob)
+            # print(ivc)
             if(ivc_log_prob < 0 ):
                 ivc_log_prob = ivc_log_prob * -1
             if ivc_log_prob > best_prob:
