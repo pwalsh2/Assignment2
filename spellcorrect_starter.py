@@ -56,7 +56,7 @@ class UnigramLM:
         # Computing this sum once in the constructor, instead of every
         # time it's needed in
         # log_prob, speeds things up
-        self.freqs["UNK"] = self.freqs.get("UNK", 0) + 1
+        self.freqs["UNK"] = self.freqs.get("UNK", 0)
         self.num_tokens = sum(self.freqs.values())
 
     def log_prob(self, word):
