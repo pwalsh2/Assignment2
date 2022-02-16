@@ -125,7 +125,7 @@ class BigramLM:
         prior = prior.lower()
         target_word = target_word.lower()
         bigram = prior + " " + target_word
-        if(self.uni_gram_lm.in_vocab(prior) and self.in_vocab(bigram)):
+        if(self.uni_gram_lm.in_vocab(prior) and self.in_bigram_vocab(bigram)):
             return math.log(self.freqs[bigram] + 1) - math.log(self.uni_gram_lm.freqs[prior] + len(self.uni_gram_lm.freqs))
         elif(self.uni_gram_lm.in_vocab(prior)):
             return math.log(1) - math.log(self.uni_gram_lm.freqs[prior] + len(self.uni_gram_lm.freqs))
@@ -137,6 +137,10 @@ class BigramLM:
       
 
     # def log_probs_unsmoothed(self, target_word, prior):
+
+    def in_bigram_vocab(self, bigram):
+        return bigram in self.freqs
+
 
     def in_vocab(self, word):
         return word.lower() in self.uni_gram_lm.freqs
@@ -211,8 +215,7 @@ if __name__ == '__main__':
           
             ivc_log_prob = ivc_log_probA + ivc_log_probB
          
-            if(ivc_log_prob < 0 ):
-                ivc_log_prob = ivc_log_prob * -1
+           
             if ivc_log_prob > best_prob:
                 best_prob = ivc_log_prob
                 best_correction = ivc
