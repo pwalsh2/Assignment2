@@ -277,11 +277,9 @@ if __name__ == '__main__':
     predict_corpus = sys.argv[2]
 
     # Train the language model
-    lm = SmoothedBigramLM(train_corpus)
-    # lm_bi = UnsmoothedBrigramLM(train_corpus)
-    # You can comment this out to run faster...
-    # lm.check_probs()
-   
+    # lm = SmoothedBigramLM(train_corpus)
+    lm = UnigramLM(train_corpus)
+    
     for line in open(predict_corpus):
         # Split the line on a tab; get the target word to correct and
         # the sentence it's in
@@ -289,13 +287,12 @@ if __name__ == '__main__':
         target_index = int(target_index)
         sentence = sentence.split()
         target_word = sentence[target_index]
-        previous_word = sentence[target_index - 1]
-        next_word = sentence[target_index + 1]
+
         # Get the in-vocabulary candidates (this starter code only
         # considers deletions)
         candidates = distance_one_edits(target_word)
         iv_candidates = [c for c in candidates if lm.in_vocab(c)]
-   
+        
         # Find the candidate correction with the highest probability;
         # if no candidate has non-zero probability, or there are no
         # candidates, give up and output the original target word as
@@ -303,20 +300,52 @@ if __name__ == '__main__':
         best_prob = float("-inf")
         best_correction = target_word
         for ivc in iv_candidates:
-            ivc_log_probA = lm.log_prob(ivc, previous_word)
-
-            ivc_log_probB = lm.log_prob(next_word, ivc)
-          
-            ivc_log_prob = ivc_log_probA + ivc_log_probB
-         
-            if(ivc_log_prob < 0 ):
-                ivc_log_prob = ivc_log_prob * -1
+            ivc_log_prob = lm.log_prob(ivc)
             if ivc_log_prob > best_prob:
                 best_prob = ivc_log_prob
                 best_correction = ivc
 
-        
         print(best_correction)
+
+    # lm_bi = UnsmoothedBrigramLM(train_corpus)
+    # You can comment this out to run faster...
+    # lm.check_probs()
+   
+    # for line in open(predict_corpus):
+    #     # Split the line on a tab; get the target word to correct and
+    #     # the sentence it's in
+    #     target_index,sentence = line.split('\t')
+    #     target_index = int(target_index)
+    #     sentence = sentence.split()
+    #     target_word = sentence[target_index]
+    #     previous_word = sentence[target_index - 1]
+    #     next_word = sentence[target_index + 1]
+    #     # Get the in-vocabulary candidates (this starter code only
+    #     # considers deletions)
+    #     candidates = distance_one_edits(target_word)
+    #     iv_candidates = [c for c in candidates if lm.in_vocab(c)]
+   
+    #     # Find the candidate correction with the highest probability;
+    #     # if no candidate has non-zero probability, or there are no
+    #     # candidates, give up and output the original target word as
+    #     # the correction.
+    #     best_prob = float("-inf")
+    #     best_correction = target_word
+    #     for ivc in iv_candidates:
+    #         ivc_log_probA = lm.log_prob(ivc, previous_word)
+
+    #         ivc_log_probB = lm.log_prob(next_word, ivc)
+          
+    #         ivc_log_prob = ivc_log_probA + ivc_log_probB
+         
+    #         if(ivc_log_prob < 0 ):
+    #             ivc_log_prob = ivc_log_prob * -1
+    #         if ivc_log_prob > best_prob:
+    #             best_prob = ivc_log_prob
+    #             best_correction = ivc
+
+        
+    #     print(best_correction)
        
 
 
