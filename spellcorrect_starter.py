@@ -307,7 +307,7 @@ if __name__ == '__main__':
 
             ivc_log_probB = lm.log_prob(next_word, ivc)
           
-            ivc_log_prob = ivc_log_prob *  ivc_log_probB
+            ivc_log_prob = ivc_log_probA *  ivc_log_probB
           
             # if(ivc_log_prob < 0 ):
             #     ivc_log_prob = ivc_log_prob * -1
