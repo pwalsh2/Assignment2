@@ -70,14 +70,14 @@ class UnigramLM:
             return math.log(1) - math.log(self.num_tokens + len(self.freqs))
 
 
-    def log_prod_unsmoothed(self, word):
+    def prob(self, word):
         word = word.lower()
         if word in self.freqs:
-            return math.log(self.freqs[word]) - math.log(self.num_tokens)
+            return (self.freqs[word] + 1) / (self.num_tokens + len(self.freqs))
         else:
             # This is a bit of a hack to get a float with the value of
             # minus infinity for words that have probability 0
-            return float("-inf")
+            return 1 / len(self.freqs)
    
     def in_vocab(self, word):
         return word in self.freqs
@@ -186,9 +186,9 @@ class InterpolatedLM:
         # it can become an issue when we multiply together many
         # probabilities)
         bi_log_prob = self.biLM.log_probs_unsmoothed(target_word, prior)
-        uni_log_prob = self.uniLM.log_prob(target_word)
+        uni_log_prob = self.uniLM.prob(target_word)
 
-        return math.log(((1-self.Lambda) * bi_log_prob + (self.Lambda)*uni_log_prob))
+        return ((1-self.Lambda) * bi_log_prob + (self.Lambda)*uni_log_prob)
 
     def check_probs(self):
         # Hint: Writing code to check whether the probabilities you
@@ -308,7 +308,7 @@ if __name__ == '__main__':
             print(best_correction)
     else:
         # interpolation 
-        Lambda = 0.4
+        Lambda = 0.25
 
         lm = InterpolatedLM(train_corpus, Lambda)
         for line in open(predict_corpus):
@@ -335,9 +335,9 @@ if __name__ == '__main__':
                 ivc_log_probA = lm.log_prob(ivc, previous_word)
 
                 ivc_log_probB = lm.log_prob(next_word, ivc)
-            
-                ivc_log_prob = ivc_log_probA + ivc_log_probB
-            
+               
+                ivc_log_prob = math.log(ivc_log_probA * ivc_log_probB)
+                
             
                 if ivc_log_prob > best_prob:
                     best_prob = ivc_log_prob
